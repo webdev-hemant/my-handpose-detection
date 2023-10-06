@@ -3,17 +3,19 @@ import Webcam from "react-webcam";
 import "@tensorflow/tfjs-backend-webgl";
 import * as handpose from "@tensorflow-models/handpose";
 import * as fp from "fingerpose";
+// import * as fpg from "fingerpose-gestures";
 import { drawHand } from "./utilities";
 import "./App.css";
+const fpg = require("fingerpose-gestures");
 
 function App() {
   const [captured, setCaptured] = useState();
+  const [emoji, setEmoji] = useState(null);
   const webcamRef = useRef(null);
   const canvasRef = useRef(null);
-
+  emoji && console.log(emoji);
   const runHandpose = async () => {
     const net = await handpose.load();
-    console.log("Handpose model loaded.");
     setInterval(() => {
       detect(net);
     }, 100);
@@ -47,14 +49,27 @@ function App() {
       // make detections
 
       const hand = await net.estimateHands(video);
-      console.log(hand);
       if (hand.length) {
         const GE = new fp.GestureEstimator([
           fp.Gestures.VictoryGesture,
           fp.Gestures.ThumbsUpGesture,
+          fpg.Gestures.thumbsDownGesture,
+          fpg.Gestures.fingerSplayedGesture,
+          fpg.Gestures.raisedHandGesture,
+          fpg.Gestures.pinchingGesture,
+          fpg.Gestures.okGesture,
+          fpg.Gestures.fistGesture,
         ]);
         const gesture = await GE.estimate(hand[0].landmarks, 8);
-        console.log(gesture);
+        if (gesture?.gestures) {
+          const confidance = gesture.gestures.map((prediction) => {
+            return prediction.score;
+          });
+          const maxConfidance = confidance.indexOf(
+            Math.max.apply(null, confidance)
+          );
+          setEmoji(gesture?.gestures?.[maxConfidance]?.name || "");
+        }
       }
       const ctx = canvasRef.current.getContext("2d");
       drawHand(hand, ctx);
