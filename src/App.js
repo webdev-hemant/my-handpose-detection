@@ -83,6 +83,7 @@ function App() {
   return (
     <div className="App">
       <h1>Hemant -- hand pose detection app</h1>
+      <h2 style={{ margin: "3rem 0 0 0" }}>You are doing :- {emoji}</h2>
       <header className="App-header">
         <Webcam
           ref={webcamRef}
@@ -122,7 +123,13 @@ function App() {
         />
       </header>
       <div>
-        <img width={300} height={200} src={captured} alt="img captured" />
+        <img
+          style={{ transform: "scaleX(-1)" }}
+          width={300}
+          height={200}
+          src={captured}
+          alt="img captured"
+        />
       </div>
     </div>
   );
